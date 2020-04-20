@@ -28,6 +28,6 @@ setup(author="Dih5",
       packages=find_packages(include=['yaconfig'], exclude=["demos", "tests", "docs"]),
       install_requires=[],
       url='https://github.com/dih5/yaconfig',
-      version='0.1.0',
+      version='0.1.1',
 
       )
