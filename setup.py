@@ -4,6 +4,11 @@
 """The setup script"""
 
 from setuptools import setup, find_packages
+import os
+
+# Get the long description from the README file
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md')) as f:
+    long_description = f.read()
 
 setup(author="Dih5",
       author_email='dihedralfive@gmail.com',
@@ -24,6 +29,8 @@ setup(author="Dih5",
           "test": ["pytest"],
       },
       keywords=[],
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       name='yaconfig',
       packages=find_packages(include=['yaconfig'], exclude=["demos", "tests", "docs"]),
       install_requires=[],
