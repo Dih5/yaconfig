@@ -122,6 +122,13 @@ class Config:
     def __contains__(self, key):
         return key in self.config
 
+    def get(self, key, value=None):
+        """Get the value of the selected parameter, returning a default value if not found"""
+        try:
+            return self.config[key]
+        except KeyError:
+            return value
+
     def items(self):
         return self.config.items()
 
