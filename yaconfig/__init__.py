@@ -39,15 +39,17 @@ class Variable:
         except AttributeError:
             return default
 
-    def _get_bash(self):
+    def _get_bash(self, prefix=""):
         if self.help:
             text = "# %s\n" % self.help
         else:
             text = ""
+
+        modified_name = prefix + self.name.upper()
         if self.default:
-            text += "export %s=%s" % (self.name, _quote_sh(self.default))
+            text += "export %s=%s" % (modified_name, _quote_sh(self.default))
         else:
-            text += "# export %s=<value>" % self.name
+            text += "# export %s=<value>" % modified_name
         return text
 
 
@@ -89,11 +91,12 @@ class MetaConfig:
         else:
             return json_string
 
-    def generate_environment_example(self, path="environment.sh"):
+    def generate_environment_example(self, path="environment.sh", prefix=""):
         """Generate an example bash configuration file"""
         text = "#!/bin/bash\n"
         text += "# Example configuration file\n\n"
-        text += "\n".join(variable._get_bash() for _, variable in self.items())
+        text += "\n\n".join(variable._get_bash(prefix=prefix) for _, variable in self.items())
+        text += "\n"
         if path is None:
             return text
         else:
