@@ -39,7 +39,7 @@ class Variable:
         except AttributeError:
             return default
 
-    def _get_bash(self, prefix=""):
+    def _get_bash(self, prefix="", value=None):
         if self.help:
             text = "# %s\n" % self.help
         else:
@@ -47,7 +47,7 @@ class Variable:
 
         modified_name = prefix + self.name.upper()
         if self.default:
-            text += "export %s=%s" % (modified_name, _quote_sh(self.default))
+            text += "export %s=%s" % (modified_name, _quote_sh(self.default if value is None else value))
         else:
             text += "# export %s=<value>" % modified_name
         return text
@@ -80,6 +80,19 @@ class MetaConfig:
     def items(self):
         return self.variables.items()
 
+    def prompt(self):
+        """Prompt the user in the command line to generate configuration values"""
+        output_values = {}
+        for key, var in self.items():
+            default = var.get("default", "")
+            help_text = var.get("help", "")
+            print("%s%s [%s]: " % (help_text + "\n" if help_text else "", key, default if default else "<not set>"),
+                  end="\n")
+            value = input()
+            output_values[key] = value if value else default
+
+        return output_values
+
     def generate_json_example(self, path="config.example.json", utf8=True):
         """Generate an example json configuration file"""
         values = {key: val.get("default", "") for key, val in self.items()}
@@ -91,7 +104,18 @@ class MetaConfig:
         else:
             return json_string
 
-    def generate_environment_example(self, path="environment.sh", prefix=""):
+    def interactive_json(self, path="config.json", utf8=True):
+        """Interactively generate a json configuration file"""
+        values = self.prompt()
+        json_string = json.dumps(values, ensure_ascii=not utf8, indent=4)
+
+        if path is not None:
+            with open(path, "w") as f:
+                f.write(json_string)
+        else:
+            return json_string
+
+    def generate_environment_example(self, path="environment.example.sh", prefix=""):
         """Generate an example bash configuration file"""
         text = "#!/bin/bash\n"
         text += "# Example configuration file\n\n"
@@ -102,6 +126,18 @@ class MetaConfig:
         else:
             with open(path, "w") as f:
                 f.write(text)
+
+    def interactive_environment(self, path="environment.sh", prefix=""):
+        values = self.prompt()
+        text = "#!/bin/bash\n"
+        text += "\n\n".join(variable._get_bash(prefix=prefix, value=values[var_name]) for var_name, variable in self.items())
+        text += "\n"
+        if path is None:
+            return text
+        else:
+            with open(path, "w") as f:
+                f.write(text)
+
 
 
 class Config:
