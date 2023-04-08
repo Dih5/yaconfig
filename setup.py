@@ -13,7 +13,7 @@ with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md'))
 setup(author="Dih5",
       author_email='dihedralfive@gmail.com',
       classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: MIT License',
           'Natural Language :: English',
@@ -23,6 +23,7 @@ setup(author="Dih5",
           'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
           'Programming Language :: Python :: 3.9',
+          'Programming Language :: Python :: 3.10',
       ],
       description='Python package to assist configuration',
       extras_require={
