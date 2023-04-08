@@ -127,6 +127,22 @@ class MetaConfig:
             with open(path, "w") as f:
                 f.write(text)
 
+    def generate_environment_md(self, prefix=""):
+        """Generate a description Markdown table for a environment-based configuration"""
+
+        names = [prefix + name.upper() for name, variable in self.items()]
+        descriptions = [variable.help for name, variable in self.items()]
+
+        # Max widths for more aesthetic code
+        name_width = max([len(name) for name in names])
+        desc_width = max([len(desc) for desc in descriptions])
+
+        header = f"| {'Name':<{name_width}} | {'Description':<{desc_width}} |\n| {'-' * name_width} | {'-' * desc_width} |\n"
+        rows = "\n".join(
+            [f"| {name:<{name_width}} | {desc:<{desc_width}} |" for name, desc in zip(names, descriptions)])
+
+        return header + rows
+
     def interactive_environment(self, path="environment.sh", prefix=""):
         values = self.prompt()
         text = "#!/bin/bash\n"
