@@ -6,10 +6,12 @@ import os
 # A test metaconfig
 metaconfig = yaconfig.MetaConfig(
     yaconfig.Variable("str", type=str, default="str", help="A string"),
-    yaconfig.Variable("bytes", type=bytes, default='_5#y2L"F4Q8z\n\xec]/', help="Bytes"),
-    yaconfig.Variable("int", type=int, default='5', help="A integer"),
-    yaconfig.Variable("float", type=float, default='0.88622692545', help="A float"),
-    yaconfig.Variable("bool", type=bool, default='false', help="A boolean"),
+    yaconfig.Variable(
+        "bytes", type=bytes, default='_5#y2L"F4Q8z\n\xec]/', help="Bytes"
+    ),
+    yaconfig.Variable("int", type=int, default="5", help="A integer"),
+    yaconfig.Variable("float", type=float, default="0.88622692545", help="A float"),
+    yaconfig.Variable("bool", type=bool, default="false", help="A boolean"),
 )
 
 expected = {
@@ -17,23 +19,23 @@ expected = {
     "bytes": bytes('_5#y2L"F4Q8z\n\xec]/', "utf8"),
     "int": 5,
     "float": 0.88622692545,
-    "bool": False
+    "bool": False,
 }
 
-json_config = '''{
+json_config = """{
     "str": "json",
     "bytes": "a",
     "int": "6",
     "float": "1.88622692545",
     "bool": "true"
-}'''
+}"""
 
 json_expected = {
     "str": "json",
-    "bytes": bytes('a', "utf8"),
+    "bytes": bytes("a", "utf8"),
     "int": 6,
     "float": 1.88622692545,
-    "bool": True
+    "bool": True,
 }
 
 
@@ -67,10 +69,10 @@ env_vars = [
 
 env_expected = {
     "str": "env",
-    "bytes": bytes('b', "utf8"),
+    "bytes": bytes("b", "utf8"),
     "int": 7,
     "float": 2.88622692545,
-    "bool": False
+    "bool": False,
 }
 
 

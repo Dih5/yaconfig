@@ -1,7 +1,7 @@
 """yaconfig - Python package to assist configuration"""
 
-__version__ = '0.4.1'
-__author__ = 'Dih5 <dihedralfive@gmail.com>'
+__version__ = "0.4.1"
+__author__ = "Dih5 <dihedralfive@gmail.com>"
 
 import json
 import os
@@ -10,7 +10,12 @@ from shlex import quote
 
 
 def _quote_sh(s):
-    return quote(s.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\0", "\\0"))
+    return quote(
+        s.replace("\n", "\\n")
+        .replace("\t", "\\t")
+        .replace("\r", "\\r")
+        .replace("\0", "\\0")
+    )
 
 
 class Variable:
@@ -47,7 +52,10 @@ class Variable:
 
         modified_name = prefix + self.name.upper()
         if self.default:
-            text += "export %s=%s" % (modified_name, _quote_sh(self.default if value is None else value))
+            text += "export %s=%s" % (
+                modified_name,
+                _quote_sh(self.default if value is None else value),
+            )
         else:
             text += "# export %s=<value>" % modified_name
         return text
@@ -86,8 +94,15 @@ class MetaConfig:
         for key, var in self.items():
             default = var.get("default", "")
             help_text = var.get("help", "")
-            print("%s%s [%s]: " % (help_text + "\n" if help_text else "", key, default if default else "<not set>"),
-                  end="\n")
+            print(
+                "%s%s [%s]: "
+                % (
+                    help_text + "\n" if help_text else "",
+                    key,
+                    default if default else "<not set>",
+                ),
+                end="\n",
+            )
             value = input()
             output_values[key] = value if value else default
 
@@ -119,7 +134,9 @@ class MetaConfig:
         """Generate an example bash configuration file"""
         text = "#!/bin/bash\n"
         text += "# Example configuration file\n\n"
-        text += "\n\n".join(variable._get_bash(prefix=prefix) for _, variable in self.items())
+        text += "\n\n".join(
+            variable._get_bash(prefix=prefix) for _, variable in self.items()
+        )
         text += "\n"
         if path is None:
             return text
@@ -139,21 +156,27 @@ class MetaConfig:
 
         header = f"| {'Name':<{name_width}} | {'Description':<{desc_width}} |\n| {'-' * name_width} | {'-' * desc_width} |\n"
         rows = "\n".join(
-            [f"| {name:<{name_width}} | {desc:<{desc_width}} |" for name, desc in zip(names, descriptions)])
+            [
+                f"| {name:<{name_width}} | {desc:<{desc_width}} |"
+                for name, desc in zip(names, descriptions)
+            ]
+        )
 
         return header + rows
 
     def interactive_environment(self, path="environment.sh", prefix=""):
         values = self.prompt()
         text = "#!/bin/bash\n"
-        text += "\n\n".join(variable._get_bash(prefix=prefix, value=values[var_name]) for var_name, variable in self.items())
+        text += "\n\n".join(
+            variable._get_bash(prefix=prefix, value=values[var_name])
+            for var_name, variable in self.items()
+        )
         text += "\n"
         if path is None:
             return text
         else:
             with open(path, "w") as f:
                 f.write(text)
-
 
 
 class Config:
@@ -213,7 +236,9 @@ class Config:
                 elif value == "false":
                     value = False
                 else:
-                    raise ValueError("Expected boolean value, found instead: %s" % value)
+                    raise ValueError(
+                        "Expected boolean value, found instead: %s" % value
+                    )
             else:
                 value = t(value)
             self.config[variable] = value

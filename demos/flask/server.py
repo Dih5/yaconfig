@@ -13,21 +13,19 @@ except FileNotFoundError:
     print("config.json file not found. Using the default configuration")
 
 # Update Flask config
-app.config.update(
-    SECRET_KEY=config["secret"]
-)
+app.config.update(SECRET_KEY=config["secret"])
 
 print("Connecting to database %s" % config["db"])
 
 
-@app.route('/')
+@app.route("/")
 def hello_world():
     return config["text"]
 
 
 def main():
-    app.run('0.0.0.0', debug=False)
+    app.run("0.0.0.0", debug=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
