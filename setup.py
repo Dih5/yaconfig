@@ -38,5 +38,5 @@ setup(
     packages=find_packages(include=["yaconfig"], exclude=["demos", "tests", "docs"]),
     install_requires=[],
     url="https://github.com/dih5/yaconfig",
-    version="0.4.1",
+    version="0.5.0",
 )
