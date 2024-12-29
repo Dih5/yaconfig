@@ -56,6 +56,7 @@ from config import config  #from .config import config if running in a package
 print(config["text"])
 ```
 
+- **In-code modification of the variables** is also possible, as in ```config["text"]="howdy!"```, but bear in mind that initialization code that used the previous value is not reloaded. Also, you have to provide a **string representation** of the value, as in ```config["number"]="5"```. This is intended to enforce the same behavior as when loading from text files.
 
 - To **document the configuration**, you can use the methods of the metaconfig variable you have defined. This can be done
 manually from the interpreter or automated by writing a script, as in the main method in the config module example. The methods available include:

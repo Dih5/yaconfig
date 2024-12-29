@@ -174,6 +174,9 @@ class Config:
     def __getitem__(self, key):
         return self.config[key]
 
+    def __setitem__(self, key, value):
+        self.load_variable(key, value)
+
     def __contains__(self, key):
         return key in self.config
 
@@ -196,6 +199,9 @@ class Config:
             value (str): Its value represented as a string.
 
         """
+        if not isinstance(value, str):
+            raise ValueError("A string representation of the value must be provided")
+            
         if variable in self.metaconfig:
             t = self.metaconfig[variable].get("type", str)
             if t == bytes:
