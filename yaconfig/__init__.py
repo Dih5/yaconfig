@@ -201,12 +201,12 @@ class Config:
         """
         if not isinstance(value, str):
             raise ValueError("A string representation of the value must be provided")
-            
+
         if variable in self.metaconfig:
             t = self.metaconfig[variable].get("type", str)
-            if t == bytes:
+            if t is bytes:
                 value = bytes(value, "utf8")
-            elif t == bool:
+            elif t is bool:
                 value = value.lower()
                 if value == "true":
                     value = True
