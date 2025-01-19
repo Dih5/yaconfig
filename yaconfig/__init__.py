@@ -135,11 +135,15 @@ class MetaConfig:
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     new_defaults = json.load(f)
-                    print("Previoulsy existing configuration file will be used to provide default values.")
+                    print(
+                        "Previoulsy existing configuration file will be used to provide default values."
+                    )
             except Exception:
                 # If there's any problem reading/parsing the file, just skip it
                 new_defaults = {}
-                print("Ignoring a previously existing configuration file which couldn't be read.")
+                print(
+                    "Ignoring a previously existing configuration file which couldn't be read."
+                )
 
         values = self.prompt(new_defaults=new_defaults)
         json_string = json.dumps(values, ensure_ascii=not utf8, indent=4)
@@ -168,14 +172,18 @@ class MetaConfig:
         """Generate a description Markdown table for a environment-based configuration"""
 
         names = [prefix + name.upper() for name, variable in self.items()]
-        descriptions = [variable.help if variable.help else "" for _, variable in self.items()]
+        descriptions = [
+            variable.help if variable.help else "" for _, variable in self.items()
+        ]
 
         # Max widths for more aesthetic code
         name_width = max([len(name) for name in names]) if names else 10
         desc_width = max([len(desc) for desc in descriptions]) if descriptions else 10
 
-        header = f"| {'Name':<{name_width}} | {'Description':<{desc_width}} |\n" \
-                 f"| {'-' * name_width} | {'-' * desc_width} |\n"
+        header = (
+            f"| {'Name':<{name_width}} | {'Description':<{desc_width}} |\n"
+            f"| {'-' * name_width} | {'-' * desc_width} |\n"
+        )
         rows = "\n".join(
             [
                 f"| {name:<{name_width}} | {desc:<{desc_width}} |"
