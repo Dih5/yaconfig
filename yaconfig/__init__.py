@@ -51,7 +51,7 @@ class Variable:
             text = ""
 
         modified_name = prefix + self.name.upper()
-        if self.default:
+        if value or self.default:
             text += "export %s=%s" % (
                 modified_name,
                 _quote_sh(self.default if value is None else value),
@@ -71,7 +71,6 @@ class MetaConfig:
             *variables (Variable): Ordered sequence of variables. Their names should be unique.
 
         """
-        self.variables = variables
         self.variables = OrderedDict()
         for variable in variables:
             name = variable["name"]
@@ -88,29 +87,36 @@ class MetaConfig:
     def items(self):
         return self.variables.items()
 
-    def prompt(self):
-        """Prompt the user in the command line to generate configuration values"""
+    def prompt(self, new_defaults=None):
+        """
+        Prompt the user in the command line to generate configuration values.
+
+        Args:
+            new_defaults (dict, optional): A dictionary specifying possibly
+                different defaults to present to the user instead of the variable's
+                built-in default. Keys must match variable names.
+        """
+        if new_defaults is None:
+            new_defaults = {}
+
         output_values = {}
         for key, var in self.items():
-            default = var.get("default", "")
+            # Use the new_defaults if available, otherwise the variable's declared default
+            default = new_defaults.get(key, var.get("default", ""))
             help_text = var.get("help", "")
-            print(
-                "%s%s [%s]: "
-                % (
-                    help_text + "\n" if help_text else "",
-                    key,
-                    default if default else "<not set>",
-                ),
-                end="\n",
-            )
-            value = input()
+
+            if help_text:
+                print(help_text)
+
+            print(f"{key} [{default if default else '<not set>'}]: ", end="\n")
+            value = input().strip()
             output_values[key] = value if value else default
 
         return output_values
 
     def generate_json_example(self, path="config.example.json", utf8=True):
         """Generate an example json configuration file"""
-        values = {key: val.get("default", "") for key, val in self.items()}
+        values = {key: var.get("default", "") for key, var in self.items()}
         json_string = json.dumps(values, ensure_ascii=not utf8, indent=4)
 
         if path is not None:
@@ -120,12 +126,26 @@ class MetaConfig:
             return json_string
 
     def interactive_json(self, path="config.json", utf8=True):
-        """Interactively generate a json configuration file"""
-        values = self.prompt()
+        """
+        Interactively generate a json configuration file.
+        If the file already exists, use existing values as default.
+        """
+        new_defaults = {}
+        if path and os.path.isfile(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    new_defaults = json.load(f)
+                    print("Previoulsy existing configuration file will be used to provide default values.")
+            except Exception:
+                # If there's any problem reading/parsing the file, just skip it
+                new_defaults = {}
+                print("Ignoring a previously existing configuration file which couldn't be read.")
+
+        values = self.prompt(new_defaults=new_defaults)
         json_string = json.dumps(values, ensure_ascii=not utf8, indent=4)
 
         if path is not None:
-            with open(path, "w") as f:
+            with open(path, "w", encoding="utf-8") as f:
                 f.write(json_string)
         else:
             return json_string
@@ -148,13 +168,14 @@ class MetaConfig:
         """Generate a description Markdown table for a environment-based configuration"""
 
         names = [prefix + name.upper() for name, variable in self.items()]
-        descriptions = [variable.help for name, variable in self.items()]
+        descriptions = [variable.help if variable.help else "" for _, variable in self.items()]
 
         # Max widths for more aesthetic code
-        name_width = max([len(name) for name in names])
-        desc_width = max([len(desc) for desc in descriptions])
+        name_width = max([len(name) for name in names]) if names else 10
+        desc_width = max([len(desc) for desc in descriptions]) if descriptions else 10
 
-        header = f"| {'Name':<{name_width}} | {'Description':<{desc_width}} |\n| {'-' * name_width} | {'-' * desc_width} |\n"
+        header = f"| {'Name':<{name_width}} | {'Description':<{desc_width}} |\n" \
+                 f"| {'-' * name_width} | {'-' * desc_width} |\n"
         rows = "\n".join(
             [
                 f"| {name:<{name_width}} | {desc:<{desc_width}} |"
@@ -218,7 +239,7 @@ class Config:
         Store a value for a variable in the configuration.
 
         Args:
-            variable: The variable name.
+            variable (str): The variable name.
             value (str): Its value represented as a string.
 
         """
@@ -258,8 +279,9 @@ class Config:
             path (str): Path to the json file.
 
         """
-        file = json.load(open(path, "r"))
-        for variable, value in file.items():
+        with open(path, "r", encoding="utf-8") as f:
+            file_data = json.load(f)
+        for variable, value in file_data.items():
             self.load_variable(variable, value)
 
     def load_environment(self, prefix=""):
@@ -270,7 +292,7 @@ class Config:
             prefix (str): A prefix for the environment variables.
 
         """
-        for variable, value in self.metaconfig.items():
-            value = os.getenv(prefix + variable.upper())
-            if value is not None:
-                self.load_variable(variable, value)
+        for variable, settings in self.metaconfig.items():
+            env_val = os.getenv(prefix + variable.upper())
+            if env_val is not None:
+                self.load_variable(variable, env_val)
