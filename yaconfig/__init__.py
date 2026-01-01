@@ -75,7 +75,7 @@ class MetaConfig:
         for variable in variables:
             name = variable["name"]
             if name in self.variables:
-                raise Variable("Variable %s defined multiple times" % name)
+                raise ValueError("Variable %s defined multiple times" % name)
             self.variables[name] = variable
 
     def __getitem__(self, key):
